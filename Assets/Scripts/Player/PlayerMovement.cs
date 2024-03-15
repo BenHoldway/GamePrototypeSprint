@@ -1,42 +1,42 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
+[RequireComponent(typeof(PlayerInput), typeof(Rigidbody2D), typeof(BoxCollider2D))]
 public class PlayerMovement : MonoBehaviour
 {
-    PlayerControls controls;
     Rigidbody2D rb;
 
     [SerializeField] float speed;
-    InputAction playerMove;
+    bool isFacingRight;
     Vector2 movement;
 
     // Start is called before the first frame update
     void Awake()
     {
-        controls = new PlayerControls();
         rb = GetComponent<Rigidbody2D>();
-    }
-
-    private void OnEnable()
-    {
-        controls?.Enable();
-
-        playerMove = controls.Player.Move;
-    }
-
-    private void OnDisable()
-    {
-        controls?.Disable();
+        isFacingRight = true;
     }
 
     // Update is called once per frame
     void Update()
     {
-        movement = playerMove.ReadValue<Vector2>().normalized;
-        if(movement.magnitude > 0.1f)
+        if(movement.magnitude > 0.02f)
             rb.velocity = movement * speed;
+
+        if ((isFacingRight && movement.x < 0) || (!isFacingRight && movement.x > 0))
+            Flip();
+    }
+
+    public void Move(InputAction.CallbackContext context)
+    {
+        movement = context.ReadValue<Vector2>();
+    }
+
+    void Flip() 
+    { 
+        isFacingRight = !isFacingRight;
+        Vector3 scale = transform.localScale;
+        scale.x *= -1f;
+        transform.localScale = scale;
     }
 }
