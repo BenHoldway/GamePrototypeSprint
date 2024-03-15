@@ -22,12 +22,30 @@
                     "processors": "",
                     "interactions": "Tap,MultiTap,Hold",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Crouch",
+                    "type": "Button",
+                    "id": "e4ef9e0f-c5a4-4d5f-ae18-c7112ce9fac8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Climb",
+                    "type": "Button",
+                    "id": "dbb743b1-868d-4333-a45b-ccacb4bdab51",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
                 {
                     "name": "Keyboard",
-                    "id": "48526257-c986-4d5b-b9e9-632e95896d88",
+                    "id": "b7fb3d0f-7178-4b9d-9a0d-b3c1b347a507",
                     "path": "2DVector",
                     "interactions": "",
                     "processors": "",
@@ -38,58 +56,36 @@
                 },
                 {
                     "name": "left",
-                    "id": "33f19505-6633-4acd-8b23-49913c6517fd",
+                    "id": "7ce88cba-d6db-4935-b4da-165e7ee1d0e9",
                     "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard+Mouse",
+                    "groups": "",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
                 {
                     "name": "right",
-                    "id": "bfdedf54-7de8-4f77-be21-3d41997b67fd",
+                    "id": "fcb4758d-7cc4-4f0b-ab0c-9011cb3d565b",
                     "path": "<Keyboard>/d",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard+Mouse",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "Controller",
-                    "id": "a293140c-c3dc-48ae-89f2-9331266c09b6",
-                    "path": "1DAxis",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Move",
-                    "isComposite": true,
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "fbc19579-0426-45fd-b023-7cea887f9026",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Controller",
+                    "action": "Move",
+                    "isComposite": false,
                     "isPartOfComposite": false
-                },
-                {
-                    "name": "negative",
-                    "id": "c5bf1aa9-8590-4574-80c6-7e0b1ad4e7f4",
-                    "path": "<Gamepad>/leftStick/left",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Controller",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "positive",
-                    "id": "da5d5140-4cd1-4184-a988-4f9d2e1c6595",
-                    "path": "<Gamepad>/leftStick/right",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Controller",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
                 },
                 {
                     "name": "",
@@ -110,6 +106,28 @@
                     "processors": "",
                     "groups": "Controller",
                     "action": "ActionKey",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9670a1fb-16ab-4557-8785-7c9e3fabcbbc",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "eb3c06bd-b8c1-4b50-ab81-c000d59f83ee",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Climb",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
