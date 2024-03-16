@@ -42,7 +42,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""id"": ""7bc5cb3a-5795-4ebe-b41d-4aaec8e614da"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": ""Tap,MultiTap,Hold"",
+                    ""interactions"": ""Hold(duration=0.4,pressPoint=0.5),MultiTap(tapTime=0.2,tapDelay=0.75,pressPoint=0.2),Tap(duration=0.2,pressPoint=0.2)"",
                     ""initialStateCheck"": false
                 },
                 {

@@ -16,8 +16,6 @@ public class PlayerMovement : MonoBehaviour
 
     PlayerControls playerControls;
 
-    public static event Action testAction;
-
     // Start is called before the first frame update
     void Awake()
     {
@@ -47,8 +45,6 @@ public class PlayerMovement : MonoBehaviour
             Vector2 pos = transform.localPosition;
             pos.y -= 0.25f;
             transform.localPosition = pos;
-
-            testAction?.Invoke();
         };
         playerControls.Player.Crouch.canceled += ctx =>
         {
@@ -58,6 +54,9 @@ public class PlayerMovement : MonoBehaviour
             pos.y += 0.25f;
             transform.localPosition = pos;
         };
+
+        AreaTrigger.showNewArea += GoToNewArea;
+        CameraManager.movePlayerToNewArea += AreaLoaded;
     }
 
     // Update is called once per frame
@@ -75,5 +74,23 @@ public class PlayerMovement : MonoBehaviour
         isFacingRight = !isFacingRight;
         scale.x *= -1f;
         transform.localScale = scale;
+    }
+
+    void GoToNewArea(GameObject newArea) 
+    {
+        playerControls.Disable();
+    }
+
+    void AreaLoaded() 
+    { 
+        Vector2 dir = Quaternion.AngleAxis(30, transform.forward) * transform.right;
+        rb.AddForce(dir * 5f, ForceMode2D.Force);
+        playerControls.Enable();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        //Gizmos.DrawLine(transform.position, Quaternion.AngleAxis(30, transform.forward) * transform.up * 10);
     }
 }
