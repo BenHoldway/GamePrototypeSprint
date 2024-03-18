@@ -1,41 +1,34 @@
 using System.Collections;
 using UnityEngine;
+using Cinemachine;
+using System;
 
 public class AreaManager : MonoBehaviour
 {
-    [SerializeField] GameObject[] adjacentAreas;
-    [SerializeField] int areaNum;
-    [SerializeField] GameObject[] roomTriggers;
+    [SerializeField] GameObject cam;
+    public static event Action ChangeRoom;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        
     }
 
-    private void OnEnable()
+    //Will enable room virtual camera when player enters the area
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        StartCoroutine(EnableTriggerTimer());
+        if (collision.gameObject.tag == "Player") 
+        {
+            cam.SetActive(true);
+            ChangeRoom?.Invoke();
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    //Hides the virtual camera when player leaves the area, so that only one virtual camera will be active at once
+    //(Only active virtual camera will be in new room)
+    private void OnTriggerExit2D(Collider2D collision)
     {
-        
-    }
-
-    IEnumerator EnableTriggerTimer() 
-    {
-        EnableTriggers(false);
-        yield return new WaitForSeconds(1);
-        EnableTriggers(true);
-    }
-
-    void EnableTriggers(bool enable) 
-    { 
-        foreach(GameObject trigger in roomTriggers) 
-        { 
-            trigger.SetActive(enable);
+        if (collision.gameObject.tag == "Player")
+        {
+            cam.SetActive(false);
         }
     }
 }

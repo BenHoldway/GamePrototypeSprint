@@ -30,19 +30,11 @@ public class PlayerJump : MonoBehaviour
 
         playerControls.Player.ActionKey.performed += ctx =>
         {
-            Debug.Log(ctx.interaction.ToString());
-            if (ctx.interaction is HoldInteraction)
-                Grapple();
-            else if (ctx.interaction is MultiTapInteraction)
-                Dash();
-            else if (ctx.interaction is TapInteraction)
-            {
-                if(IsGrounded())
-                    Jump();
+            if(IsGrounded())
+                Jump();
 
-                if(ctx.canceled && rb.velocity.y > 0f)
-                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
-            }
+            if(ctx.canceled && rb.velocity.y > 0f)
+                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
         };
     }
 

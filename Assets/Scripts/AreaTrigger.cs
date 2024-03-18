@@ -14,12 +14,11 @@ public class AreaTrigger : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
     }
 
     private void OnEnable()
     {
-        CameraManager.movingFinished += UnloadOldArea;
+        DetectNewArea.GoToNewArea += Trigger;
     }
 
     // Update is called once per frame
@@ -28,22 +27,37 @@ public class AreaTrigger : MonoBehaviour
         
     }
 
-    void UnloadOldArea() 
+    //Runs when the GoToNewArea event is called
+    void Trigger(GameObject _trigger)
     {
-        if (loadingNewArea)
+        //Checks to see if the trigger triggered is this same one
+        if(gameObject.name == _trigger.name && !loadingNewArea) 
         {
-            oldArea.SetActive(false);
-            loadingNewArea = false;
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if(collision.gameObject.tag == "Player" && !loadingNewArea)
-        {
+            //Calls event, and reveals new area
             showNewArea?.Invoke(newArea);
             newArea.SetActive(true);
             loadingNewArea = true;
         }
     }
+
+    void UnloadOldArea() 
+    {
+        //Will only run if new area is being loaded
+        if (loadingNewArea)
+        {
+            //Hides old area
+            oldArea.SetActive(false);
+            loadingNewArea = false;
+        }
+    }
+
+/*    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.tag == "Player" && !loadingNewArea)
+        {
+            showNewArea?.Invoke(newArea, false);
+            newArea.SetActive(true);
+            loadingNewArea = true;
+        }
+    }*/
 }
