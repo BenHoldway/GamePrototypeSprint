@@ -16,10 +16,19 @@ public class PlayerJump : MonoBehaviour
     [SerializeField] LayerMask groundLayer;
     [SerializeField] LayerMask wallLayer;
 
+    bool isOnGround;
+    bool isJumping;
+
     [SerializeField] int maxJumpNum;
     int currentJump;
 
     [SerializeField] float jumpingPower;
+    [SerializeField] float normalGravityScale;
+    [SerializeField] float maxFallSpeed;
+    [SerializeField] float fallMultiplier;
+
+    float coyoteTime = 0.2f;
+    float coyoteTimeCounter;
 
     // Start is called before the first frame update
     void Awake()
@@ -35,10 +44,17 @@ public class PlayerJump : MonoBehaviour
 
         playerControls.Player.ActionKey.performed += ctx =>
         {
-            if(IsGrounded())
+            if(currentJump < maxJumpNum && coyoteTimeCounter > 0f)
+            {
+                isJumping = true;
                 Jump();
+            }
+        };
 
-            if (ctx.canceled && rb.velocity.y > 0f)
+        playerControls.Player.ActionKey.canceled += ctx =>
+        {
+            isJumping = false;
+            if (rb.velocity.y > 0f)
                 rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
         };
     }
@@ -48,10 +64,20 @@ public class PlayerJump : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //if (IsOnWall() && rb.velocity.y < 0f)
-        //    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+        isOnGround = IsGrounded();
 
-        onGround = Physics2D.BoxCast(groundCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, Vector2.down, groundLayer);
+        if (IsOnWall() && rb.velocity.y < 0f)
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+
+        GravityControl();
+
+        if (isOnGround && !isJumping)
+        {
+            currentJump = 0;
+            coyoteTimeCounter = coyoteTime;
+        }
+        else if (currentJump == 0)
+            coyoteTimeCounter -= Time.deltaTime;
     }
 
 
@@ -62,40 +88,43 @@ public class PlayerJump : MonoBehaviour
 
     void Jump()
     {
-        currentJump++;
-        //Debug.Log("Jumped");
-
         rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
+        currentJump++;
+    }
+
+    void GravityControl() 
+    { 
+        if(rb.velocity.y > 0f) 
+        { 
+            rb.gravityScale = normalGravityScale * fallMultiplier;
+            rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -maxFallSpeed));
+        }
+        else if(rb.gravityScale != normalGravityScale)
+            rb.gravityScale = normalGravityScale;
     }
 
     bool IsGrounded()
     {
-        if (currentJump < maxJumpNum)
+        if(Physics2D.OverlapBox(groundCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, groundLayer))
         {
-         //   print(currentJump);
             return true;
         }
 
-        bool isOnGround = Physics2D.BoxCast(new Vector2(0, -1), new Vector2(transform.localScale.x, 0.05f), 0, Vector2.down);
-
-        Debug.Log(isOnGround);
-
-        if(isOnGround)
-        {
-            currentJump = 0;
-        }
-
-        return isOnGround;
+        return false;
     }
 
-    //bool IsOnWall() 
-    //{
-    //    if (!IsGrounded())
-    //        if (!Physics2D.BoxCast(rightSideCheck.position, new Vector2(0.05f, transform.localScale.y), 0, transform.right, groundLayer))
-    //            return Physics2D.BoxCast(leftSideCheck.position, new Vector2(0.05f, transform.localScale.y), 0, -transform.right, groundLayer);
+    bool IsOnWall() 
+    {
+        if (!isOnGround)
+        {
+            bool isOnWall = Physics2D.OverlapBox(rightSideCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, wallLayer);
+            if (!isOnWall)
+                isOnWall = Physics2D.OverlapBox(leftSideCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, wallLayer);
 
-    //    return false;
-    //}
+            return isOnWall;
+        }
+        return false;
+    }
 
 
 
@@ -109,7 +138,7 @@ public class PlayerJump : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(groundCheck.position - transform.up * 0.05f, new Vector3(transform.localScale.x, 0.1f, 0.01f));
+        Gizmos.DrawWireCube(groundCheck.position, new Vector2(transform.localScale.x, 0.1f));
        // Gizmos.DrawWireCube(leftSideCheck.position - transform.right * 0.025f, new Vector3(0.05f, transform.localScale.y, 0.01f));
        // Gizmos.DrawWireCube(rightSideCheck.position + transform.right * 0.025f, new Vector3(0.05f, transform.localScale.y, 0.01f));
     }

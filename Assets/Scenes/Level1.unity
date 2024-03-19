@@ -730,8 +730,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 309702208}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -4.71, z: 0}
-  m_LocalScale: {x: 18.247032, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -6.27, z: 0}
+  m_LocalScale: {x: 22.80879, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1048132099}
@@ -1045,7 +1045,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &734390400
 Transform:
   m_ObjectHideFlags: 0
@@ -1099,7 +1099,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 5
+    OrthographicSize: 6.39
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -1142,8 +1142,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 969962277}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -9.33, y: 0.01, z: 0}
-  m_LocalScale: {x: 1, y: 10.4, z: 1}
+  m_LocalPosition: {x: -11.31, y: 0.0099999, z: 0}
+  m_LocalScale: {x: 1, y: 13.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1048132099}
@@ -1294,12 +1294,12 @@ Transform:
   - {fileID: 309702210}
   - {fileID: 1093504145}
   - {fileID: 1551422092}
-  - {fileID: 1503253297}
-  - {fileID: 734390400}
   - {fileID: 1697973426}
   - {fileID: 306625912}
   - {fileID: 260521849}
   - {fileID: 969962278}
+  - {fileID: 1503253297}
+  - {fileID: 734390400}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1346,7 +1346,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 18, y: 10}
+  m_Size: {x: 23, y: 13}
   m_EdgeRadius: 0
 --- !u!66 &1048132101
 CompositeCollider2D:
@@ -1387,20 +1387,20 @@ CompositeCollider2D:
   m_ColliderPaths:
   - m_Collider: {fileID: 1048132100}
     m_ColliderPaths:
-    - - X: 90000000
-        Y: 50000000
-      - X: -90000000
-        Y: 50000000
-      - X: -90000000
-        Y: -50000000
-      - X: 90000000
-        Y: -50000000
+    - - X: 115000000
+        Y: 65000000
+      - X: -115000000
+        Y: 65000000
+      - X: -115000000
+        Y: -65000000
+      - X: 115000000
+        Y: -65000000
   m_CompositePaths:
     m_Paths:
-    - - {x: 8.99997, y: -5}
-      - {x: 8.99997, y: 5}
-      - {x: -9, y: 4.999971}
-      - {x: -8.99997, y: -5}
+    - - {x: 11.49997, y: -6.5}
+      - {x: 11.49997, y: 6.5}
+      - {x: -11.5, y: 6.499971}
+      - {x: -11.49997, y: -6.5}
   m_VertexDistance: 0.0005
   m_OffsetDistance: 0.00005
   m_UseDelaunayMesh: 0
@@ -1796,8 +1796,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1551422091}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.72, z: 0}
-  m_LocalScale: {x: 18.247032, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 6.27, z: 0}
+  m_LocalScale: {x: 22.80879, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1048132099}

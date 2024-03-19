@@ -354,7 +354,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   maxJumpNum: 2
-  jumpingPower: 7
+  jumpingPower: 20
+  normalGravityScale: 2
+  maxFallSpeed: 25
+  fallMultiplier: 3
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -414,11 +417,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.1
-  far clip plane: 5000
-  field of view: 40
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 6.39
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -442,7 +445,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.08, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
