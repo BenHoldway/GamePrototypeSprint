@@ -1,21 +1,15 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Interactions;
 
 public class PlayerJump : MonoBehaviour
 {
     PlayerControls playerControls;
+    PlayerMovement playerMovement;
     Rigidbody2D rb;
 
+    #region Jumping
     [SerializeField] Transform groundCheck;
-    [SerializeField] Transform leftSideCheck;
-    [SerializeField] Transform rightSideCheck;
     [SerializeField] LayerMask groundLayer;
-    [SerializeField] LayerMask wallLayer;
-
+ 
     bool isOnGround;
     bool isJumping;
 
@@ -29,12 +23,30 @@ public class PlayerJump : MonoBehaviour
 
     float coyoteTime = 0.2f;
     float coyoteTimeCounter;
+    #endregion
+
+    #region WallSliding
+    [SerializeField] Transform wallCheck;
+    [SerializeField] LayerMask wallLayer;
+
+    bool isWallSliding;
+
+        #region WallJumping
+        [SerializeField] Vector2 wallJumpPower;
+        [SerializeField] float wallJumpTime;
+        [SerializeField] float wallJumpDuration;
+        bool isWallJumping;
+        float wallJumpDir;
+        float wallJumpCounter;
+        #endregion
+    #endregion
 
     // Start is called before the first frame update
     void Awake()
     {
         playerControls = new PlayerControls();
         rb = GetComponent<Rigidbody2D>();
+        playerMovement = GetComponent<PlayerMovement>();
         currentJump = 0;
     }
 
@@ -44,6 +56,23 @@ public class PlayerJump : MonoBehaviour
 
         playerControls.Player.ActionKey.performed += ctx =>
         {
+            WallJump();
+
+            if(wallJumpCounter > 0f)
+            {
+                if(transform.localScale.x != wallJumpDir)
+                {
+                    playerMovement.Flip();
+                }
+                isWallJumping = true;
+                rb.velocity = new Vector2(wallJumpDir * wallJumpPower.x, wallJumpPower.y);
+                Debug.Log("Jump");
+                wallJumpCounter = 0;
+
+
+                Invoke(nameof(StopWallJump), wallJumpDuration);
+            }
+
             if(currentJump < maxJumpNum && coyoteTimeCounter > 0f)
             {
                 isJumping = true;
@@ -66,8 +95,13 @@ public class PlayerJump : MonoBehaviour
     {
         isOnGround = IsGrounded();
 
-        if (IsOnWall() && rb.velocity.y < 0f)
+        if (IsOnWall() && !isOnGround && rb.velocity.y < 0f)
+        {
+            isWallSliding = true;
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+        }
+        else
+            isWallSliding = false;
 
         GravityControl();
 
@@ -89,12 +123,32 @@ public class PlayerJump : MonoBehaviour
     void Jump()
     {
         rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
+        //rb.AddForce(Vector2.up * jumpingPower, ForceMode2D.Impulse);
         currentJump++;
+    }
+
+    private void WallJump()
+    {
+        if(isWallSliding)
+        {
+            isWallJumping = true;
+            //Gets the direction of the player, and inverses it
+            wallJumpDir = -transform.localScale.x;
+            wallJumpCounter = wallJumpTime;
+            CancelInvoke(nameof(StopWallJump));
+        }
+        else
+            wallJumpCounter -= Time.deltaTime;
+    }
+
+    void StopWallJump()
+    {
+        isWallJumping = false;
     }
 
     void GravityControl() 
     { 
-        if(rb.velocity.y > 0f) 
+        if(rb.velocity.y < 0f) 
         { 
             rb.gravityScale = normalGravityScale * fallMultiplier;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -maxFallSpeed));
@@ -105,25 +159,12 @@ public class PlayerJump : MonoBehaviour
 
     bool IsGrounded()
     {
-        if(Physics2D.OverlapBox(groundCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, groundLayer))
-        {
-            return true;
-        }
-
-        return false;
+        return Physics2D.OverlapBox(groundCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, groundLayer);
     }
 
     bool IsOnWall() 
     {
-        if (!isOnGround)
-        {
-            bool isOnWall = Physics2D.OverlapBox(rightSideCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, wallLayer);
-            if (!isOnWall)
-                isOnWall = Physics2D.OverlapBox(leftSideCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, wallLayer);
-
-            return isOnWall;
-        }
-        return false;
+        return Physics2D.OverlapBox(wallCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, wallLayer);
     }
 
 

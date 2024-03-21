@@ -76,7 +76,7 @@ public class PlayerMovement : MonoBehaviour
             Flip();
     }
 
-    void Flip() 
+    public void Flip() 
     { 
         //Will swap the direction that the player is facing
         isFacingRight = !isFacingRight;
