@@ -21,8 +21,8 @@ public class PlayerJump : MonoBehaviour
     [SerializeField] float maxFallSpeed;
     [SerializeField] float fallMultiplier;
 
-    float coyoteTime = 0.2f;
-    float coyoteTimeCounter;
+    float coyoteMaxTime = 0.2f;
+    float coyoteTimer;
     #endregion
 
     #region WallSliding
@@ -33,11 +33,11 @@ public class PlayerJump : MonoBehaviour
 
         #region WallJumping
         [SerializeField] Vector2 wallJumpPower;
-        [SerializeField] float wallJumpTime;
+        [SerializeField] float wallJumpMaxTime;
         [SerializeField] float wallJumpDuration;
         bool isWallJumping;
         float wallJumpDir;
-        float wallJumpCounter;
+        float wallJumpTimer;
         #endregion
     #endregion
 
@@ -54,26 +54,28 @@ public class PlayerJump : MonoBehaviour
     {
         playerControls.Enable();
 
+        //Jump is performed
         playerControls.Player.ActionKey.performed += ctx =>
         {
             WallJump();
 
-            if(wallJumpCounter > 0f)
+            //Runs if the timer is above 0 and able to wall jump
+            if(wallJumpTimer > 0f)
             {
+                //Flips the player if the player is not facing the direction of the wall jump
                 if(transform.localScale.x != wallJumpDir)
-                {
                     playerMovement.Flip();
-                }
+
                 isWallJumping = true;
                 rb.velocity = new Vector2(wallJumpDir * wallJumpPower.x, wallJumpPower.y);
-                Debug.Log("Jump");
-                wallJumpCounter = 0;
+                wallJumpTimer = 0;
+                currentJump++;
 
-
+                //Stops the wall jump
                 Invoke(nameof(StopWallJump), wallJumpDuration);
             }
-
-            if(currentJump < maxJumpNum && coyoteTimeCounter > 0f)
+            //Makes the player jump if the player isn't wall jumping and can jump normally
+            else if(currentJump < maxJumpNum && coyoteTimer > 0f)
             {
                 isJumping = true;
                 Jump();
@@ -95,38 +97,37 @@ public class PlayerJump : MonoBehaviour
     {
         isOnGround = IsGrounded();
 
+        //If player is on wall, not on the ground and falling, set vertical speed to sliding speed
         if (IsOnWall() && !isOnGround && rb.velocity.y < 0f)
         {
             isWallSliding = true;
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
         }
+        //Disables the player wall sliding
         else
             isWallSliding = false;
 
+        //Handles the gravity depending on if the player is falling or not
         GravityControl();
 
+        //Resets the jumping counter and coyote time
         if (isOnGround && !isJumping)
         {
             currentJump = 0;
-            coyoteTimeCounter = coyoteTime;
+            coyoteTimer = coyoteMaxTime;
         }
+        //Decreases coyote time when player isn't on the ground
         else if (currentJump == 0)
-            coyoteTimeCounter -= Time.deltaTime;
-    }
-
-
-    void Grapple()
-    {
-
+            coyoteTimer -= Time.deltaTime;
     }
 
     void Jump()
     {
         rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
-        //rb.AddForce(Vector2.up * jumpingPower, ForceMode2D.Impulse);
         currentJump++;
     }
 
+    //Handles the wall jump
     private void WallJump()
     {
         if(isWallSliding)
@@ -134,37 +135,44 @@ public class PlayerJump : MonoBehaviour
             isWallJumping = true;
             //Gets the direction of the player, and inverses it
             wallJumpDir = -transform.localScale.x;
-            wallJumpCounter = wallJumpTime;
+            wallJumpTimer = wallJumpMaxTime;
             CancelInvoke(nameof(StopWallJump));
         }
+        //Decreases wall jump time
         else
-            wallJumpCounter -= Time.deltaTime;
+            wallJumpTimer -= Time.deltaTime;
     }
 
+    //Stops the player wall jump
     void StopWallJump()
     {
         isWallJumping = false;
     }
 
+    //Controls gravity amount
     void GravityControl() 
     { 
+        //If player is falling, gravity increases over time until it reaches the max fall speed
         if(rb.velocity.y < 0f) 
         { 
             rb.gravityScale = normalGravityScale * fallMultiplier;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -maxFallSpeed));
         }
+        //Sets gravity back to normal if player is not falling
         else if(rb.gravityScale != normalGravityScale)
             rb.gravityScale = normalGravityScale;
     }
 
+    //Checks if player is on the ground
     bool IsGrounded()
     {
         return Physics2D.OverlapBox(groundCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, groundLayer);
     }
 
+    //Checks if player is up against the wall
     bool IsOnWall() 
     {
-        return Physics2D.OverlapBox(wallCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, wallLayer);
+        return Physics2D.OverlapBox(wallCheck.position, new Vector2(0.1f, transform.localScale.y), 0, wallLayer);
     }
 
 
@@ -180,7 +188,6 @@ public class PlayerJump : MonoBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireCube(groundCheck.position, new Vector2(transform.localScale.x, 0.1f));
-       // Gizmos.DrawWireCube(leftSideCheck.position - transform.right * 0.025f, new Vector3(0.05f, transform.localScale.y, 0.01f));
-       // Gizmos.DrawWireCube(rightSideCheck.position + transform.right * 0.025f, new Vector3(0.05f, transform.localScale.y, 0.01f));
+        Gizmos.DrawWireCube(wallCheck.position, new Vector3(0.1f, transform.localScale.y));
     }
 }
