@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 31729600}
   m_Layer: 0
   m_Name: GroundCheck
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -375,13 +375,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grapple: {fileID: 975396295}
-  grappleLength: 8
-  grappleLayer:
+  grappleLength: 10
+  objectsInLevel:
     serializedVersion: 2
-    m_Bits: 256
-  grappleTimeIncrement: 0.2
+    m_Bits: 448
+  grappleTimeIncrement: 0.05
   grappleCurrentTime: 0
-  grappleVelocity: 10
+  grappleVelocity: 20
 --- !u!232 &343624251
 DistanceJoint2D:
   m_ObjectHideFlags: 0
@@ -621,7 +621,7 @@ GameObject:
   - component: {fileID: 969962278}
   m_Layer: 0
   m_Name: WallCheck
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -653,7 +653,7 @@ GameObject:
   - component: {fileID: 975396295}
   m_Layer: 0
   m_Name: Grapple
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -789,7 +789,7 @@ GameObject:
   - component: {fileID: 1127165818}
   m_Layer: 0
   m_Name: Eye2
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -873,7 +873,7 @@ GameObject:
   - component: {fileID: 1477611187}
   m_Layer: 0
   m_Name: Eye1
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

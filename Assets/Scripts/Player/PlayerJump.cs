@@ -4,6 +4,8 @@ public class PlayerJump : MonoBehaviour
 {
     PlayerControls playerControls;
     PlayerMovement playerMovement;
+    AreaChecks areaChecks;
+
     Rigidbody2D rb;
 
     #region Jumping
@@ -47,6 +49,8 @@ public class PlayerJump : MonoBehaviour
         playerControls = new PlayerControls();
         rb = GetComponent<Rigidbody2D>();
         playerMovement = GetComponent<PlayerMovement>();
+        areaChecks = GetComponent<AreaChecks>();
+
         currentJump = 0;
     }
 
@@ -67,7 +71,7 @@ public class PlayerJump : MonoBehaviour
                     playerMovement.Flip();
 
                 isWallJumping = true;
-                rb.velocity = new Vector2(wallJumpDir * wallJumpPower.x, wallJumpPower.y);
+                rb.AddForce(new Vector2(wallJumpDir * wallJumpPower.x, wallJumpPower.y), ForceMode2D.Impulse);
                 wallJumpTimer = 0;
                 currentJump++;
 
@@ -87,7 +91,14 @@ public class PlayerJump : MonoBehaviour
             isJumping = false;
             if (rb.velocity.y > 0f)
                 rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+
+            Invoke(nameof(StopWallJump), 0);
         };
+    }
+
+    private void OnDisable()
+    {
+        playerControls.Disable();
     }
 
 
@@ -95,10 +106,10 @@ public class PlayerJump : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        isOnGround = IsGrounded();
+        isOnGround = areaChecks.IsGrounded();
 
         //If player is on wall, not on the ground and falling, set vertical speed to sliding speed
-        if (IsOnWall() && !isOnGround && rb.velocity.y < 0f)
+        if (areaChecks.IsOnWall() && !isOnGround && rb.velocity.y < 0f)
         {
             isWallSliding = true;
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
@@ -161,33 +172,5 @@ public class PlayerJump : MonoBehaviour
         //Sets gravity back to normal if player is not falling
         else if(rb.gravityScale != normalGravityScale)
             rb.gravityScale = normalGravityScale;
-    }
-
-    //Checks if player is on the ground
-    bool IsGrounded()
-    {
-        return Physics2D.OverlapBox(groundCheck.position, new Vector2(transform.localScale.x, 0.1f), 0, groundLayer);
-    }
-
-    //Checks if player is up against the wall
-    bool IsOnWall() 
-    {
-        return Physics2D.OverlapBox(wallCheck.position, new Vector2(0.1f, transform.localScale.y), 0, wallLayer);
-    }
-
-
-
-
-
-
-
-
-
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(groundCheck.position, new Vector2(transform.localScale.x, 0.1f));
-        Gizmos.DrawWireCube(wallCheck.position, new Vector3(0.1f, transform.localScale.y));
     }
 }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.InputSystem.Interactions;
 
 [RequireComponent(typeof(DistanceJoint2D))]
 public class PlayerGrapple : MonoBehaviour
@@ -15,7 +16,7 @@ public class PlayerGrapple : MonoBehaviour
 
     [SerializeField] LineRenderer grapple;
     [SerializeField] float grappleLength;
-    [SerializeField] LayerMask grappleLayer;
+    [SerializeField] LayerMask objectsInLevel;
     [SerializeField] float grappleTimeIncrement;
     [SerializeField] float grappleCurrentTime;
     [SerializeField] float grappleVelocity;
@@ -43,31 +44,33 @@ public class PlayerGrapple : MonoBehaviour
 
         playerControls.Player.Grapple.performed += ctx =>
         {
-            Debug.Log("Grapple");
-            grapple.enabled = true;
-            extendGrapple = true;
-
-            GetRayAngle();
-
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, rayAngle, grappleLength);
-            if (hit.collider != null)
+            if (ctx.interaction is HoldInteraction)
             {
-                grapplePoint = hit.point;
+                Debug.Log("Hold");
+                //rayAngle = new Vector2(transform.position.x + (grappleLength * transform.localScale.x), transform.position.y + grappleLength);
+                rayAngle = ReturnRayAngle();
 
-                grapplePoint.z = 0;
+                grapple.enabled = true;
+                extendGrapple = true;
 
-                if(hit.collider.gameObject.tag == "Grappable") 
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, rayAngle, grappleLength, objectsInLevel);
+                if (hit.collider != null)
                 {
-                    hasGrappled = true;
-                    joint.connectedAnchor = grapplePoint;
-                    joint.distance = grappleLength;
-                    joint.enabled = true;
+                    grapplePoint = hit.point;
+
+                    grapplePoint.z = 0;
+
+                    if (hit.collider.gameObject.tag == "Grappable")
+                    {
+                        hasGrappled = true;
+                        joint.connectedAnchor = grapplePoint;
+                        joint.distance = grappleLength;
+                        joint.enabled = true;
+                    }
                 }
+                else
+                    grapplePoint = transform.position + (rayAngle * grappleLength);
             }
-            else
-                grapplePoint = transform.position + (rayAngle * grappleLength);
-
-
         };
 
         playerControls.Player.Grapple.canceled += ctx =>
@@ -82,11 +85,11 @@ public class PlayerGrapple : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(grapple.enabled)
+
+        if (grapple.enabled)
         {
             if (!extendGrapple)
             {
-                Debug.Log("Retract");
                 grappleCurrentTime -= grappleTimeIncrement;
                 if(grappleCurrentTime < 0f)
                     FinishGrapple();
@@ -94,11 +97,9 @@ public class PlayerGrapple : MonoBehaviour
             else if (grappleCurrentTime < 1f)
             {
                 grappleCurrentTime += grappleTimeIncrement;
-                Debug.Log("Extend");
             }
             else if (grappleCurrentTime >= 1f)
             {
-                Debug.Log("Grapple Extension Finished");
                 joint.enabled = false;
                 extendGrapple = false;
 
@@ -108,7 +109,6 @@ public class PlayerGrapple : MonoBehaviour
                 }
             }
 
-
             currentGrapplePoint = Vector3.Lerp(transform.position, grapplePoint, grappleCurrentTime);
             grapple.SetPosition(1, transform.position);
             grapple.SetPosition(0, currentGrapplePoint);
@@ -117,14 +117,26 @@ public class PlayerGrapple : MonoBehaviour
 
     }
 
-    void GetRayAngle() 
+    Vector3 ReturnRayAngle() 
     { 
-        rayAngle = new Vector2(transform.position.x + (grappleLength * transform.localScale.x), transform.position.y + grappleLength);
+        float angle = 0f;
+
+        if (transform.localScale.x == 1f)
+            angle = -45f;
+        else
+            angle = 45f;
+
+        return Quaternion.Euler(0, 0, angle) * Vector3.up;
     }
+
 
     void GrappleForce() 
     {
-        rb.velocity = new Vector2(rayAngle.x * grappleVelocity, rayAngle.y * grappleVelocity);
+        //rb.velocity = new Vector2(rayAngle.x * grappleVelocity, rayAngle.y * grappleVelocity);
+        rb.AddForce(new Vector2(transform.localScale.x, 1) * grappleVelocity, ForceMode2D.Impulse);
+
+        //rb.AddForce(new Vector2(rayAngle.x * grappleVelocity, rayAngle.y * grappleVelocity));
+        Debug.Log(new Vector2(rayAngle.x * grappleVelocity, rayAngle.y * grappleVelocity));
         hasGrappled = false;
     }
 
@@ -136,9 +148,15 @@ public class PlayerGrapple : MonoBehaviour
         extendGrapple = false;
     }
 
+
+
+
+
+
     private void OnDrawGizmos()
     {
+        rayAngle = ReturnRayAngle();
         Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(transform.position, new Vector2(transform.position.x + (grappleLength * transform.localScale.x), transform.position.y + grappleLength));
+        Gizmos.DrawLine(transform.position, transform.position + (rayAngle * grappleLength));
     }
 }

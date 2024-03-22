@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D rb;
+    AreaChecks areaChecks;
 
     [SerializeField] float speed;
     bool isFacingRight;
@@ -39,6 +40,7 @@ public class PlayerMovement : MonoBehaviour
         playerControls.Player.Move.canceled += ctx =>
         {
             movement = ctx.ReadValue<Vector2>();
+            rb.velocity = new Vector2(movement.x * speed, rb.velocity.y);
         };
 
         //Will 'squish' the player so they crouch
@@ -50,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
             pos.y -= 0.25f;
             transform.localPosition = pos;
         };
+
         //Will 'unsquish' the player so they stand back up
         playerControls.Player.Crouch.canceled += ctx =>
         {
@@ -64,16 +67,28 @@ public class PlayerMovement : MonoBehaviour
         CameraManager.RoomSuccessfullyChanged += EnableInput;
     }
 
+    private void OnDisable()
+    {
+        playerControls.Disable();
+
+        AreaManager.ChangeRoom -= DisableInput;
+        CameraManager.RoomSuccessfullyChanged -= EnableInput;
+    }
+
     // Update is called once per frame
     void Update()
     {
         //Will move the player when the input value is above 0.02f in the direction of travel
-        if(movement.x > 0.02f || movement.x < 0.02f)
+        if(movement.x > 0.02f || movement.x < -0.02f)
             rb.velocity = new Vector2 (movement.x * speed, rb.velocity.y);
 
         //If the movement is opposite to the direction that the player is facing, then call the flip function
         if ((isFacingRight && movement.x < 0) || (!isFacingRight && movement.x > 0))
             Flip();
+
+        if (movement.x == 0 && !(rb.velocity.x == 0))
+            if(areaChecks.IsGrounded())
+                rb.velocity = new Vector2(0, rb.velocity.y);
     }
 
     public void Flip() 
