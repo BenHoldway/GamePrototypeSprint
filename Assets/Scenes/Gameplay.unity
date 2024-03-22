@@ -170,6 +170,7 @@ GameObject:
   - component: {fileID: 343624249}
   - component: {fileID: 343624250}
   - component: {fileID: 343624251}
+  - component: {fileID: 343624252}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -402,6 +403,26 @@ DistanceJoint2D:
   m_AutoConfigureDistance: 1
   m_Distance: 4.399784
   m_MaxDistanceOnly: 0
+--- !u!114 &343624252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343624243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c23565538ae55541937abeb012c1729, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  groundCheck: {fileID: 31729600}
+  wallCheck: {fileID: 969962278}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
