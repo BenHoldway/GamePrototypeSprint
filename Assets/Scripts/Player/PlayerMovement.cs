@@ -1,16 +1,18 @@
 using Cinemachine;
 using System;
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
+[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(ManageInput))]
 public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D rb;
     AreaChecks areaChecks;
     PlayerGrapple grapple;
     PlayerJump jump;
+    ManageInput input;
 
     [SerializeField] float speed;
     bool isFacingRight;
@@ -20,8 +22,6 @@ public class PlayerMovement : MonoBehaviour
 
     Vector2 roomChangeVelocity;
 
-    PlayerControls playerControls;
-
     // Start is called before the first frame update
     void Awake()
     {
@@ -30,29 +30,28 @@ public class PlayerMovement : MonoBehaviour
         grapple = GetComponent<PlayerGrapple>();
         jump = GetComponent<PlayerJump>();
 
+        input = GetComponent<ManageInput>();
+
         isFacingRight = true;
         scale = transform.localScale;
-
-        playerControls = new PlayerControls();
     }
 
     private void OnEnable()
     {
-        playerControls.Enable();
         //Reads the value when the move input is started
-        playerControls.Player.Move.started += ctx => 
+        input.PlayerControls.Player.Move.started += ctx => 
         {
             movement = ctx.ReadValue<Vector2>();
         };
         //Reads the value when the move input is cancelled - stops the player from continuing to move
-        playerControls.Player.Move.canceled += ctx =>
+        input.PlayerControls.Player.Move.canceled += ctx =>
         {
             movement = ctx.ReadValue<Vector2>();
             rb.velocity = new Vector2(movement.x * speed, rb.velocity.y);
         };
 
         //Will 'squish' the player so they crouch
-        playerControls.Player.Crouch.started += ctx =>
+        input.PlayerControls.Player.Crouch.started += ctx =>
         {
             scale.y *= 0.5f;
             transform.localScale = scale;
@@ -62,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
         };
 
         //Will 'unsquish' the player so they stand back up
-        playerControls.Player.Crouch.canceled += ctx =>
+        input.PlayerControls.Player.Crouch.canceled += ctx =>
         {
             scale.y *= 2.0f;
             transform.localScale = scale;
@@ -77,8 +76,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnDisable()
     {
-        playerControls.Disable();
-
         AreaManager.ChangeRoom -= DisableInput;
         CameraManager.RoomSuccessfullyChanged -= EnableInput;
     }
@@ -107,12 +104,12 @@ public class PlayerMovement : MonoBehaviour
         transform.localScale = scale;
     }
 
-    void DisableInput(bool _isFirstRoom) 
+    public void DisableInput(bool _isFirstRoom) 
     {
         roomChangeVelocity = rb.velocity;
 
         //Disables input
-        playerControls.Disable();
+        input.enabled = false;
         rb.velocity = Vector2.zero;
         rb.isKinematic = true;
             
@@ -127,10 +124,10 @@ public class PlayerMovement : MonoBehaviour
         grapple.enabled = false;
     }
 
-    void EnableInput() 
+    public void EnableInput() 
     {
         //Disables input
-        playerControls.Enable();
+        input.enabled = true;
         rb.isKinematic = false;
 
         rb.AddForce(roomChangeVelocity, ForceMode2D.Impulse);

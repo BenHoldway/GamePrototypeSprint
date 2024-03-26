@@ -1,8 +1,10 @@
+using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(ManageInput))]
 public class PlayerJump : MonoBehaviour
 {
-    PlayerControls playerControls;
+    ManageInput input;
     PlayerMovement playerMovement;
     AreaChecks areaChecks;
 
@@ -47,20 +49,20 @@ public class PlayerJump : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        playerControls = new PlayerControls();
         rb = GetComponent<Rigidbody2D>();
         playerMovement = GetComponent<PlayerMovement>();
         areaChecks = GetComponent<AreaChecks>();
+        input = GetComponent<ManageInput>();
 
         currentJump = 0;
     }
 
     private void OnEnable()
     {
-        playerControls.Enable();
+        input.enabled = true;
 
         //Jump is performed
-        playerControls.Player.ActionKey.performed += ctx =>
+        input.PlayerControls.Player.ActionKey.performed += ctx =>
         {
             WallJump();
 
@@ -76,6 +78,8 @@ public class PlayerJump : MonoBehaviour
                 wallJumpTimer = 0;
                 currentJump++;
 
+                ReenableInput();
+
                 //Stops the wall jump
                 Invoke(nameof(StopWallJump), wallJumpDuration);
             }
@@ -87,7 +91,7 @@ public class PlayerJump : MonoBehaviour
             }
         };
 
-        playerControls.Player.ActionKey.canceled += ctx =>
+        input.PlayerControls.Player.ActionKey.canceled += ctx =>
         {
             isJumping = false;
             if (rb.velocity.y > 0f)
@@ -95,11 +99,6 @@ public class PlayerJump : MonoBehaviour
 
             Invoke(nameof(StopWallJump), 0);
         };
-    }
-
-    private void OnDisable()
-    {
-        playerControls.Disable();
     }
 
 
@@ -173,5 +172,12 @@ public class PlayerJump : MonoBehaviour
         //Sets gravity back to normal if player is not falling
         else if (rb.gravityScale != normalGravityScale)
             rb.gravityScale = normalGravityScale;
+    }
+
+    public IEnumerator ReenableInput()
+    {
+        input.enabled = false;
+        yield return new WaitForSeconds(1);
+        input.enabled = true;
     }
 }
