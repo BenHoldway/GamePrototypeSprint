@@ -104,7 +104,7 @@ public class PlayerMovement : MonoBehaviour
         transform.localScale = scale;
     }
 
-    public void DisableInput(bool _isFirstRoom) 
+    public void DisableInput(bool _isFirstRoom, Vector2 direction) 
     {
         roomChangeVelocity = rb.velocity;
 
@@ -116,7 +116,8 @@ public class PlayerMovement : MonoBehaviour
         //Gets 2 units in front of where the player is facing, and sets the player's position to this new position
         if(!_isFirstRoom)
         {
-            Vector2 newPos = new Vector2(transform.position.x + (scale.x * 2f), transform.position.y);
+            if(direction == Vector2.right || direction == Vector2.left)
+                Vector2 newPos = new Vector2(transform.position.x + (scale.x * 2f), transform.position.y);
             transform.position = newPos;
         }
 

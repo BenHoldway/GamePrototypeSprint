@@ -69,16 +69,12 @@ public class PlayerJump : MonoBehaviour
             //Runs if the timer is above 0 and able to wall jump
             if(wallJumpTimer > 0f)
             {
-                //Flips the player if the player is not facing the direction of the wall jump
-                if(transform.localScale.x != wallJumpDir)
-                    playerMovement.Flip();
-
                 isWallJumping = true;
                 rb.AddForce(new Vector2(wallJumpDir * wallJumpPower.x, wallJumpPower.y), ForceMode2D.Impulse);
                 wallJumpTimer = 0;
                 currentJump++;
 
-                ReenableInput();
+                //StartCorReenableInput();
 
                 //Stops the wall jump
                 Invoke(nameof(StopWallJump), wallJumpDuration);
@@ -115,7 +111,7 @@ public class PlayerJump : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -slidingSpeed, 10));
         }
         //Disables the player wall sliding
-        else
+        else if(wallJumpTimer <= 0f)
             isWallSliding = false;
 
         //Handles the gravity depending on if the player is falling or not
@@ -130,6 +126,14 @@ public class PlayerJump : MonoBehaviour
         //Decreases coyote time when player isn't on the ground
         else if (currentJump == 0)
             coyoteTimer -= Time.deltaTime;
+
+        if (isWallSliding)
+        {
+            if(wallJumpTimer != wallJumpMaxTime)
+                wallJumpTimer = wallJumpMaxTime;
+            else
+                wallJumpTimer -= Time.deltaTime;
+        }
     }
 
     void Jump()
@@ -149,9 +153,6 @@ public class PlayerJump : MonoBehaviour
             wallJumpTimer = wallJumpMaxTime;
             CancelInvoke(nameof(StopWallJump));
         }
-        //Decreases wall jump time
-        else
-            wallJumpTimer -= Time.deltaTime;
     }
 
     //Stops the player wall jump
