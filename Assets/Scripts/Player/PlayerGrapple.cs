@@ -22,7 +22,8 @@ public class PlayerGrapple : MonoBehaviour
     [SerializeField] float grappleVelocity;
     Vector3 rayAngle;
 
-    bool hasGrappled;
+    public bool HasGrappled { get; private set; }
+
     bool extendGrapple;
 
 
@@ -62,7 +63,7 @@ public class PlayerGrapple : MonoBehaviour
 
                     if (hit.collider.gameObject.tag == "Grappable")
                     {
-                        hasGrappled = true;
+                        HasGrappled = true;
                         joint.connectedAnchor = grapplePoint;
                         joint.distance = grappleLength;
                         joint.enabled = true;
@@ -80,6 +81,11 @@ public class PlayerGrapple : MonoBehaviour
                 FinishGrapple();
             }
         };
+    }
+
+    private void OnDisable()
+    {
+        playerControls.Disable();
     }
 
     // Update is called once per frame
@@ -103,7 +109,7 @@ public class PlayerGrapple : MonoBehaviour
                 joint.enabled = false;
                 extendGrapple = false;
 
-                if (hasGrappled) 
+                if (HasGrappled) 
                 {
                     GrappleForce();
                 }
@@ -132,12 +138,9 @@ public class PlayerGrapple : MonoBehaviour
 
     void GrappleForce() 
     {
-        //rb.velocity = new Vector2(rayAngle.x * grappleVelocity, rayAngle.y * grappleVelocity);
+        //rb.velocity = new Vector2(transform.localScale.x, 1) * grappleVelocity;
         rb.AddForce(new Vector2(transform.localScale.x, 1) * grappleVelocity, ForceMode2D.Impulse);
-
-        //rb.AddForce(new Vector2(rayAngle.x * grappleVelocity, rayAngle.y * grappleVelocity));
-        Debug.Log(new Vector2(rayAngle.x * grappleVelocity, rayAngle.y * grappleVelocity));
-        hasGrappled = false;
+        HasGrappled = false;
     }
 
     void FinishGrapple()

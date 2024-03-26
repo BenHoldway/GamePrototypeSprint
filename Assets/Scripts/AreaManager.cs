@@ -6,7 +6,8 @@ using System;
 public class AreaManager : MonoBehaviour
 {
     [SerializeField] GameObject cam;
-    public static event Action ChangeRoom;
+    [SerializeField] bool isFirstRoom;
+    public static event Action<bool> ChangeRoom;
 
     private void Start()
     {
@@ -18,7 +19,7 @@ public class AreaManager : MonoBehaviour
         if (collision.gameObject.tag == "Player") 
         {
             cam.SetActive(true);
-            ChangeRoom?.Invoke();
+            ChangeRoom?.Invoke(isFirstRoom);
         }
     }
 

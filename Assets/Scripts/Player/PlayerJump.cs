@@ -30,6 +30,7 @@ public class PlayerJump : MonoBehaviour
     #region WallSliding
     [SerializeField] Transform wallCheck;
     [SerializeField] LayerMask wallLayer;
+    [SerializeField] float slidingSpeed;
 
     bool isWallSliding;
 
@@ -112,7 +113,7 @@ public class PlayerJump : MonoBehaviour
         if (areaChecks.IsOnWall() && !isOnGround && rb.velocity.y < 0f)
         {
             isWallSliding = true;
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+            rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -slidingSpeed, 10));
         }
         //Disables the player wall sliding
         else
@@ -162,15 +163,15 @@ public class PlayerJump : MonoBehaviour
 
     //Controls gravity amount
     void GravityControl() 
-    { 
+    {
         //If player is falling, gravity increases over time until it reaches the max fall speed
-        if(rb.velocity.y < 0f) 
-        { 
+        if (rb.velocity.y < 0f)
+        {
             rb.gravityScale = normalGravityScale * fallMultiplier;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -maxFallSpeed));
         }
         //Sets gravity back to normal if player is not falling
-        else if(rb.gravityScale != normalGravityScale)
+        else if (rb.gravityScale != normalGravityScale)
             rb.gravityScale = normalGravityScale;
     }
 }

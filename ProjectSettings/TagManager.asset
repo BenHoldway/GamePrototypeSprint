@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Grappable
+  - Obstacle
   layers:
   - Default
   - TransparentFX

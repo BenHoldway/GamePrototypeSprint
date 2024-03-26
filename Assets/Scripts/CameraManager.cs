@@ -33,7 +33,7 @@ public class CameraManager : MonoBehaviour
 
     }
 
-    private void StartCamChange()
+    private void StartCamChange(bool _isFirstRoom)
     {
         isMovingToNewArea = true;
     }

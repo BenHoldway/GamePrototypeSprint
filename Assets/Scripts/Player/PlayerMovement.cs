@@ -9,6 +9,8 @@ public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D rb;
     AreaChecks areaChecks;
+    PlayerGrapple grapple;
+    PlayerJump jump;
 
     [SerializeField] float speed;
     bool isFacingRight;
@@ -16,12 +18,18 @@ public class PlayerMovement : MonoBehaviour
     Vector3 scale;
     Vector2 movement;
 
+    Vector2 roomChangeVelocity;
+
     PlayerControls playerControls;
 
     // Start is called before the first frame update
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        areaChecks = GetComponent<AreaChecks>();
+        grapple = GetComponent<PlayerGrapple>();
+        jump = GetComponent<PlayerJump>();
+
         isFacingRight = true;
         scale = transform.localScale;
 
@@ -79,14 +87,14 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         //Will move the player when the input value is above 0.02f in the direction of travel
-        if(movement.x > 0.02f || movement.x < -0.02f)
+        if(Mathf.Abs(movement.x) > 0.02f)
             rb.velocity = new Vector2 (movement.x * speed, rb.velocity.y);
 
         //If the movement is opposite to the direction that the player is facing, then call the flip function
         if ((isFacingRight && movement.x < 0) || (!isFacingRight && movement.x > 0))
             Flip();
 
-        if (movement.x == 0 && !(rb.velocity.x == 0))
+        if (movement.x == 0f && !(rb.velocity.x == 0f) && !grapple.HasGrappled && rb.velocity.y == 0f)
             if(areaChecks.IsGrounded())
                 rb.velocity = new Vector2(0, rb.velocity.y);
     }
@@ -99,19 +107,37 @@ public class PlayerMovement : MonoBehaviour
         transform.localScale = scale;
     }
 
-    void DisableInput() 
+    void DisableInput(bool _isFirstRoom) 
     {
+        roomChangeVelocity = rb.velocity;
+
         //Disables input
         playerControls.Disable();
-        
+        rb.velocity = Vector2.zero;
+        rb.isKinematic = true;
+            
         //Gets 2 units in front of where the player is facing, and sets the player's position to this new position
-        Vector2 newPos = new Vector2(transform.position.x + (scale.x * 2f), transform.position.y);
-        transform.position = newPos;
+        if(!_isFirstRoom)
+        {
+            Vector2 newPos = new Vector2(transform.position.x + (scale.x * 2f), transform.position.y);
+            transform.position = newPos;
+        }
+
+        jump.enabled = false;
+        grapple.enabled = false;
     }
 
     void EnableInput() 
     {
         //Disables input
         playerControls.Enable();
+        rb.isKinematic = false;
+
+        rb.AddForce(roomChangeVelocity, ForceMode2D.Impulse);
+
+        grapple.enabled = true;
+        
+        jump.enabled = true;
+        grapple.enabled = true;
     }
 }
