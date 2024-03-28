@@ -1,10 +1,10 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(ManageInput))]
+[RequireComponent(typeof(InputManager))]
 public class PlayerJump : MonoBehaviour
 {
-    ManageInput input;
+    InputManager input;
     PlayerMovement playerMovement;
     AreaChecks areaChecks;
 
@@ -53,7 +53,7 @@ public class PlayerJump : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         playerMovement = GetComponent<PlayerMovement>();
         areaChecks = GetComponent<AreaChecks>();
-        input = GetComponent<ManageInput>();
+        input = GetComponent<InputManager>();
     }
 
     private void OnEnable()

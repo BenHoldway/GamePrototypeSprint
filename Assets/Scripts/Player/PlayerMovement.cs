@@ -5,14 +5,14 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(ManageInput))]
+[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(InputManager))]
 public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D rb;
     AreaChecks areaChecks;
     PlayerGrapple grapple;
     PlayerJump jump;
-    ManageInput input;
+    InputManager input;
 
     [SerializeField] float normalSpeed;
     [SerializeField] float wallJumpSpeed;
@@ -22,9 +22,10 @@ public class PlayerMovement : MonoBehaviour
     bool isFacingRight;
     bool isUncrouching;
     Vector3 scale;
+    public Vector3 Scale { get { return scale; } private set { value = scale; } }
     Vector2 movement;
 
-    Vector2 roomChangeVelocity;
+    public Vector2 roomChangeVelocity { get; set; }
 
     // Start is called before the first frame update
     void Awake()
@@ -34,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
         grapple = GetComponent<PlayerGrapple>();
         jump = GetComponent<PlayerJump>();
 
-        input = GetComponent<ManageInput>();
+        input = GetComponent<InputManager>();
 
         isFacingRight = true;
         scale = transform.localScale;
@@ -77,13 +78,11 @@ public class PlayerMovement : MonoBehaviour
             isUncrouching = true;
         };
 
-        AreaManager.ChangeRoom += DisableInput;
         CameraManager.RoomSuccessfullyChanged += EnableInput;
     }
 
     private void OnDisable()
     {
-        AreaManager.ChangeRoom -= DisableInput;
         CameraManager.RoomSuccessfullyChanged -= EnableInput;
 
         movement = Vector2.zero;
@@ -145,40 +144,14 @@ public class PlayerMovement : MonoBehaviour
         transform.localScale = scale;
     }
 
-    public void DisableInput(bool _isFirstRoom, Vector2 direction) 
-    {
-        roomChangeVelocity = rb.velocity;
-
-        //Disables input
-        input.enabled = false;
-        rb.velocity = Vector2.zero;
-        rb.isKinematic = true;
-
-        //Gets 2 units in front of where the player is facing, and sets the player's position to this new position
-        if(!_isFirstRoom)
-        {
-            Vector2 newPos = Vector2.zero;
-
-            if (direction == Vector2.up)
-                newPos = new Vector2(transform.position.x, transform.position.y + 2f);
-            else if (direction == Vector2.down)
-                newPos = new Vector2(transform.position.x, transform.position.y - 2f);
-            else    
-                newPos = new Vector2(transform.position.x + (scale.x * 2f), transform.position.y);
-
-            transform.position = newPos;
-        }
-
-        jump.enabled = false;
-        grapple.enabled = false;
-    }
 
     public void EnableInput() 
     {
-        //Disables input
+        //Enables input
         input.enabled = true;
         rb.isKinematic = false;
 
+        rb.velocity = Vector2.zero;
         Debug.Log(roomChangeVelocity);
         rb.AddForce(roomChangeVelocity, ForceMode2D.Impulse);
 
