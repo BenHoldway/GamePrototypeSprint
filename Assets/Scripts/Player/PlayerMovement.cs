@@ -14,9 +14,13 @@ public class PlayerMovement : MonoBehaviour
     PlayerJump jump;
     ManageInput input;
 
-    [SerializeField] float speed;
+    [SerializeField] float normalSpeed;
+    [SerializeField] float wallJumpSpeed;
+    [SerializeField] float crouchSpeed;
+
+    float currentSpeed;
     bool isFacingRight;
-    bool isMoving;
+    bool isUncrouching;
     Vector3 scale;
     Vector2 movement;
 
@@ -34,12 +38,14 @@ public class PlayerMovement : MonoBehaviour
 
         isFacingRight = true;
         scale = transform.localScale;
+
+        currentSpeed = normalSpeed;
     }
 
     private void OnEnable()
     {
         //Reads the value when the move input is started
-        input.PlayerControls.Player.Move.started += ctx => 
+        input.PlayerControls.Player.Move.performed += ctx => 
         {
             movement = ctx.ReadValue<Vector2>();
         };
@@ -47,27 +53,28 @@ public class PlayerMovement : MonoBehaviour
         input.PlayerControls.Player.Move.canceled += ctx =>
         {
             movement = ctx.ReadValue<Vector2>();
-            rb.velocity = new Vector2(movement.x * speed, rb.velocity.y);
+            rb.velocity = new Vector2(movement.x * currentSpeed, rb.velocity.y);
         };
 
         //Will 'squish' the player so they crouch
         input.PlayerControls.Player.Crouch.started += ctx =>
         {
+            if (isUncrouching)
+                return;
+
             scale.y *= 0.5f;
             transform.localScale = scale;
             Vector2 pos = transform.localPosition;
             pos.y -= 0.25f;
             transform.localPosition = pos;
+
+            currentSpeed = crouchSpeed;
         };
 
         //Will 'unsquish' the player so they stand back up
         input.PlayerControls.Player.Crouch.canceled += ctx =>
         {
-            scale.y *= 2.0f;
-            transform.localScale = scale;
-            Vector2 pos = transform.localPosition;
-            pos.y += 0.25f;
-            transform.localPosition = pos;
+            isUncrouching = true;
         };
 
         AreaManager.ChangeRoom += DisableInput;
@@ -78,22 +85,56 @@ public class PlayerMovement : MonoBehaviour
     {
         AreaManager.ChangeRoom -= DisableInput;
         CameraManager.RoomSuccessfullyChanged -= EnableInput;
+
+        movement = Vector2.zero;
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         //Will move the player when the input value is above 0.02f in the direction of travel
         if(Mathf.Abs(movement.x) > 0.02f)
-            rb.velocity = new Vector2 (movement.x * speed, rb.velocity.y);
+            rb.velocity = new Vector2 (movement.x * currentSpeed, rb.velocity.y);
 
         //If the movement is opposite to the direction that the player is facing, then call the flip function
         if ((isFacingRight && movement.x < 0) || (!isFacingRight && movement.x > 0))
             Flip();
 
-        if (movement.x == 0f && !(rb.velocity.x == 0f) && !grapple.HasGrappled && rb.velocity.y == 0f)
+        //Debug.Log(movement.x == 0f && rb.velocity.x >= 0.1f && !grapple.HasGrappled && rb.velocity.y <= 0.1f);
+
+        if (jump.IsWallJumping)
+            currentSpeed = wallJumpSpeed;
+        else
+            currentSpeed = normalSpeed;
+
+        
+        if (movement.x == 0f && rb.velocity.x >= 0.1f && !grapple.HasGrappled && rb.velocity.y <= 0.1f)
+        {
+            Debug.Log("AA");
             if(areaChecks.IsGrounded())
+            {
+                Debug.Log("AAAAAAAAAAA");
                 rb.velocity = new Vector2(0, rb.velocity.y);
+            }
+        }
+
+
+        if(isUncrouching)
+        {
+            if(areaChecks.CanUncrouch())
+            {
+                scale.y *= 2.0f;
+                transform.localScale = scale;
+                Vector2 pos = transform.localPosition;
+                pos.y += 0.25f;
+                transform.localPosition = pos;
+
+                currentSpeed = normalSpeed;
+                isUncrouching = false;
+            }
+            Debug.Log(areaChecks.CanUncrouch());
+        }
+
     }
 
     public void Flip() 
@@ -112,12 +153,19 @@ public class PlayerMovement : MonoBehaviour
         input.enabled = false;
         rb.velocity = Vector2.zero;
         rb.isKinematic = true;
-            
+
         //Gets 2 units in front of where the player is facing, and sets the player's position to this new position
         if(!_isFirstRoom)
         {
-            if(direction == Vector2.right || direction == Vector2.left)
-                Vector2 newPos = new Vector2(transform.position.x + (scale.x * 2f), transform.position.y);
+            Vector2 newPos = Vector2.zero;
+
+            if (direction == Vector2.up)
+                newPos = new Vector2(transform.position.x, transform.position.y + 2f);
+            else if (direction == Vector2.down)
+                newPos = new Vector2(transform.position.x, transform.position.y - 2f);
+            else    
+                newPos = new Vector2(transform.position.x + (scale.x * 2f), transform.position.y);
+
             transform.position = newPos;
         }
 
@@ -131,6 +179,7 @@ public class PlayerMovement : MonoBehaviour
         input.enabled = true;
         rb.isKinematic = false;
 
+        Debug.Log(roomChangeVelocity);
         rb.AddForce(roomChangeVelocity, ForceMode2D.Impulse);
 
         grapple.enabled = true;

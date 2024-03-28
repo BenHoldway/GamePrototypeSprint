@@ -17,8 +17,8 @@ public class PlayerJump : MonoBehaviour
     bool isOnGround;
     bool isJumping;
 
-    [SerializeField] int maxJumpNum;
-    int currentJump;
+    [SerializeField] bool canJump;
+    [SerializeField] bool canAirJump;
 
     [SerializeField] float jumpingPower;
     [SerializeField] float normalGravityScale;
@@ -43,6 +43,7 @@ public class PlayerJump : MonoBehaviour
         bool isWallJumping;
         float wallJumpDir;
         float wallJumpTimer;
+        public bool IsWallJumping { get; private set; }
         #endregion
     #endregion
 
@@ -53,8 +54,6 @@ public class PlayerJump : MonoBehaviour
         playerMovement = GetComponent<PlayerMovement>();
         areaChecks = GetComponent<AreaChecks>();
         input = GetComponent<ManageInput>();
-
-        currentJump = 0;
     }
 
     private void OnEnable()
@@ -72,17 +71,25 @@ public class PlayerJump : MonoBehaviour
                 isWallJumping = true;
                 rb.AddForce(new Vector2(wallJumpDir * wallJumpPower.x, wallJumpPower.y), ForceMode2D.Impulse);
                 wallJumpTimer = 0;
-                currentJump++;
 
                 //StartCorReenableInput();
 
                 //Stops the wall jump
                 Invoke(nameof(StopWallJump), wallJumpDuration);
             }
+
+
             //Makes the player jump if the player isn't wall jumping and can jump normally
-            else if(currentJump < maxJumpNum && coyoteTimer > 0f)
+            else if(canJump && coyoteTimer > 0f)
             {
                 isJumping = true;
+                canJump = false;
+                Jump();
+            }
+            else if(canAirJump)
+            {
+                isJumping = true;
+                canAirJump = false;
                 Jump();
             }
         };
@@ -120,11 +127,13 @@ public class PlayerJump : MonoBehaviour
         //Resets the jumping counter and coyote time
         if (isOnGround && !isJumping)
         {
-            currentJump = 0;
+            canJump = true; 
+            canAirJump = true;
+            
             coyoteTimer = coyoteMaxTime;
         }
         //Decreases coyote time when player isn't on the ground
-        else if (currentJump == 0)
+        else if (canJump)
             coyoteTimer -= Time.deltaTime;
 
         if (isWallSliding)
@@ -139,7 +148,6 @@ public class PlayerJump : MonoBehaviour
     void Jump()
     {
         rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
-        currentJump++;
     }
 
     //Handles the wall jump

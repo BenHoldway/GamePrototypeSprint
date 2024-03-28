@@ -7,10 +7,19 @@ public class AreaManager : MonoBehaviour
 {
     [SerializeField] GameObject cam;
     [SerializeField] bool isFirstRoom;
-    public static event Action<bool> ChangeRoom;
 
-    private void Start()
+    Vector2 newAreaDirection;
+
+    public static event Action<bool, Vector2> ChangeRoom;
+
+    private void OnEnable()
     {
+        SetNewAreaDirection.SetDirection += SetDirection;
+    }
+
+    private void SetDirection(Vector2 _direction)
+    {
+        newAreaDirection = _direction;
     }
 
     //Will enable room virtual camera when player enters the area
@@ -19,7 +28,7 @@ public class AreaManager : MonoBehaviour
         if (collision.gameObject.tag == "Player") 
         {
             cam.SetActive(true);
-            ChangeRoom?.Invoke(isFirstRoom);
+            ChangeRoom?.Invoke(isFirstRoom, newAreaDirection);
         }
     }
 
