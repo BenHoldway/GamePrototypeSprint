@@ -40,10 +40,10 @@ public class PlayerJump : MonoBehaviour
         [SerializeField] Vector2 wallJumpPower;
         [SerializeField] float wallJumpMaxTime;
         [SerializeField] float wallJumpDuration;
-        bool isWallJumping;
-        float wallJumpDir;
         float wallJumpTimer;
+        bool canWallJump;
         public bool IsWallJumping { get; private set; }
+        public float WallJumpDir {  get; private set; }
         #endregion
     #endregion
 
@@ -63,16 +63,15 @@ public class PlayerJump : MonoBehaviour
         //Jump is performed
         input.PlayerControls.Player.ActionKey.performed += ctx =>
         {
-            WallJump();
-
             //Runs if the timer is above 0 and able to wall jump
-            if(wallJumpTimer > 0f)
+            if(wallJumpTimer > 0f && canWallJump)
             {
-                isWallJumping = true;
-                rb.AddForce(new Vector2(wallJumpDir * wallJumpPower.x, wallJumpPower.y), ForceMode2D.Impulse);
+                canWallJump = false;
+                IsWallJumping = true;
+                rb.AddForce(new Vector2(WallJumpDir * wallJumpPower.x, wallJumpPower.y), ForceMode2D.Impulse);
                 wallJumpTimer = 0;
 
-                //StartCorReenableInput();
+                //StartCoroutine(ReenableInput());
 
                 //Stops the wall jump
                 Invoke(nameof(StopWallJump), wallJumpDuration);
@@ -110,16 +109,27 @@ public class PlayerJump : MonoBehaviour
     void Update()
     {
         isOnGround = areaChecks.IsGrounded();
+        bool isOnWall = areaChecks.IsOnWall();
 
         //If player is on wall, not on the ground and falling, set vertical speed to sliding speed
-        if (areaChecks.IsOnWall() && !isOnGround && rb.velocity.y < 0f)
+        if (isOnWall && !isOnGround && rb.velocity.y < 0f)
         {
-            isWallSliding = true;
+            if (!canWallJump)
+            {
+                canWallJump = true;
+                //Gets the direction of the player, and inverses it
+                WallJumpDir = -transform.localScale.x;
+                wallJumpTimer = wallJumpMaxTime;
+                CancelInvoke(nameof(StopWallJump));
+            }
+
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -slidingSpeed, 10));
         }
         //Disables the player wall sliding
-        else if(wallJumpTimer <= 0f)
-            isWallSliding = false;
+        else if(wallJumpTimer <= 0f || isOnGround)
+            canWallJump = false;
+        else if(canWallJump)
+            wallJumpTimer -= Time.deltaTime;
 
         //Handles the gravity depending on if the player is falling or not
         GravityControl();
@@ -131,18 +141,12 @@ public class PlayerJump : MonoBehaviour
             canAirJump = true;
             
             coyoteTimer = coyoteMaxTime;
+            wallJumpTimer = wallJumpMaxTime;
         }
         //Decreases coyote time when player isn't on the ground
         else if (canJump)
             coyoteTimer -= Time.deltaTime;
 
-        if (isWallSliding)
-        {
-            if(wallJumpTimer != wallJumpMaxTime)
-                wallJumpTimer = wallJumpMaxTime;
-            else
-                wallJumpTimer -= Time.deltaTime;
-        }
     }
 
     void Jump()
@@ -150,23 +154,10 @@ public class PlayerJump : MonoBehaviour
         rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
     }
 
-    //Handles the wall jump
-    private void WallJump()
-    {
-        if(isWallSliding)
-        {
-            isWallJumping = true;
-            //Gets the direction of the player, and inverses it
-            wallJumpDir = -transform.localScale.x;
-            wallJumpTimer = wallJumpMaxTime;
-            CancelInvoke(nameof(StopWallJump));
-        }
-    }
-
     //Stops the player wall jump
     void StopWallJump()
     {
-        isWallJumping = false;
+        IsWallJumping = false;
     }
 
     //Controls gravity amount
@@ -186,7 +177,7 @@ public class PlayerJump : MonoBehaviour
     public IEnumerator ReenableInput()
     {
         input.enabled = false;
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.5f);
         input.enabled = true;
     }
 }

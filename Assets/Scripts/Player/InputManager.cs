@@ -33,6 +33,7 @@ public class InputManager : MonoBehaviour
         PlayerControls.Enable();
 
         UIManager.ChangeGameState += Disable;
+        FinishLevel.levelCompleted += Disable;
         AreaManager.ChangeRoom += AreaChange;
     }
 
@@ -40,6 +41,7 @@ public class InputManager : MonoBehaviour
     {
         PlayerControls.Disable();
         UIManager.ChangeGameState -= Disable;
+        FinishLevel.levelCompleted -= Disable;
         AreaManager.ChangeRoom -= AreaChange;
     }
 
@@ -50,29 +52,28 @@ public class InputManager : MonoBehaviour
 
     void AreaChange(bool _isFirstRoom, Vector2 direction)
     {
-            movement.roomChangeVelocity = rb.velocity;
+        movement.roomChangeVelocity = rb.velocity;
 
-            //Disables input
-            rb.velocity = Vector2.zero;
-            rb.isKinematic = true;
+        //Disables input
+        rb.velocity = Vector2.zero;
+        rb.isKinematic = true;
 
-            //Gets 2 units in front of where the player is facing, and sets the player's position to this new position
-            if (!_isFirstRoom)
-            {
-                Vector2 newPos = Vector2.zero;
+        //Gets 2 units in front of where the player is facing, and sets the player's position to this new position
+        if (!_isFirstRoom)
+        {
+            Vector2 newPos = Vector2.zero;
 
-                if (direction == Vector2.up)
-                    newPos = new Vector2(transform.position.x, transform.position.y + 2f);
-                else if (direction == Vector2.down)
-                    newPos = new Vector2(transform.position.x, transform.position.y - 2f);
-                else
-                    newPos = new Vector2(transform.position.x + (movement.Scale.x * 2f), transform.position.y);
+            if (direction == Vector2.up)
+                newPos = new Vector2(transform.position.x, transform.position.y + 2f);
+            else if (direction != Vector2.down)
+                newPos = new Vector2(transform.position.x + (movement.Scale.x * 2f), transform.position.y);
 
+            if(newPos != Vector2.zero)
                 transform.position = newPos;
-            }
+        }
 
-            jump.enabled = false;
-            grapple.enabled = false;
-            this.enabled = false;
+        jump.enabled = false;
+        grapple.enabled = false;
+        this.enabled = false;
     }
 }

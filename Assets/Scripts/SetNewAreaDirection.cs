@@ -14,7 +14,6 @@ public class SetNewAreaDirection : MonoBehaviour
     {
         if(collision.gameObject.tag == "Player")
         {
-            Debug.Log(gameObject.name);
             SetDirection?.Invoke(direction);
         }
     }

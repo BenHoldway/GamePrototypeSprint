@@ -19,7 +19,10 @@ public class AreaManager : MonoBehaviour
 
     private void SetDirection(Vector2 _direction)
     {
-        newAreaDirection = _direction;
+        if (_direction == Vector2.zero)
+            _direction = new Vector2(0, -1);
+        else
+            newAreaDirection = _direction;
     }
 
     //Will enable room virtual camera when player enters the area
@@ -28,7 +31,6 @@ public class AreaManager : MonoBehaviour
         if (collision.gameObject.tag == "Player") 
         {
             cam.SetActive(true);
-            ChangeRoom?.Invoke(isFirstRoom, newAreaDirection);
         }
     }
 
@@ -39,6 +41,7 @@ public class AreaManager : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             cam.SetActive(false);
+            ChangeRoom?.Invoke(isFirstRoom, newAreaDirection);
         }
     }
 }

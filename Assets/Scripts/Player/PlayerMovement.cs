@@ -16,14 +16,14 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] float normalSpeed;
     [SerializeField] float wallJumpSpeed;
-    [SerializeField] float crouchSpeed;
 
     float currentSpeed;
-    bool isFacingRight;
+    public bool IsFacingRight { get; private set; }
     bool isUncrouching;
     Vector3 scale;
     public Vector3 Scale { get { return scale; } private set { value = scale; } }
     Vector2 movement;
+    float movementDir;
 
     public Vector2 roomChangeVelocity { get; set; }
 
@@ -37,7 +37,7 @@ public class PlayerMovement : MonoBehaviour
 
         input = GetComponent<InputManager>();
 
-        isFacingRight = true;
+        IsFacingRight = true;
         scale = transform.localScale;
 
         currentSpeed = normalSpeed;
@@ -68,8 +68,6 @@ public class PlayerMovement : MonoBehaviour
             Vector2 pos = transform.localPosition;
             pos.y -= 0.25f;
             transform.localPosition = pos;
-
-            currentSpeed = crouchSpeed;
         };
 
         //Will 'unsquish' the player so they stand back up
@@ -91,28 +89,30 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (jump.IsWallJumping)
+        {
+            currentSpeed = wallJumpSpeed;
+            movementDir = jump.WallJumpDir;
+        }
+        else
+        {
+            currentSpeed = normalSpeed;
+            movementDir = movement.x;
+        }
+
         //Will move the player when the input value is above 0.02f in the direction of travel
-        if(Mathf.Abs(movement.x) > 0.02f)
-            rb.velocity = new Vector2 (movement.x * currentSpeed, rb.velocity.y);
+        if (Mathf.Abs(movementDir) > 0.02f)
+            rb.velocity = new Vector2 (movementDir * currentSpeed, rb.velocity.y);
 
         //If the movement is opposite to the direction that the player is facing, then call the flip function
-        if ((isFacingRight && movement.x < 0) || (!isFacingRight && movement.x > 0))
+        if ((IsFacingRight && movementDir < 0) || (!IsFacingRight && movement.x > 0) && !jump.IsWallJumping)
             Flip();
 
-        //Debug.Log(movement.x == 0f && rb.velocity.x >= 0.1f && !grapple.HasGrappled && rb.velocity.y <= 0.1f);
 
-        if (jump.IsWallJumping)
-            currentSpeed = wallJumpSpeed;
-        else
-            currentSpeed = normalSpeed;
-
-        
-        if (movement.x == 0f && rb.velocity.x >= 0.1f && !grapple.HasGrappled && rb.velocity.y <= 0.1f)
+        if (movementDir == 0f && Mathf.Abs(rb.velocity.x) >= 0.1f && !grapple.IsGrappling && rb.velocity.y <= 0.1f)
         {
-            Debug.Log("AA");
-            if(areaChecks.IsGrounded())
+            if (areaChecks.IsGrounded())
             {
-                Debug.Log("AAAAAAAAAAA");
                 rb.velocity = new Vector2(0, rb.velocity.y);
             }
         }
@@ -127,11 +127,8 @@ public class PlayerMovement : MonoBehaviour
                 Vector2 pos = transform.localPosition;
                 pos.y += 0.25f;
                 transform.localPosition = pos;
-
-                currentSpeed = normalSpeed;
                 isUncrouching = false;
             }
-            Debug.Log(areaChecks.CanUncrouch());
         }
 
     }
@@ -139,7 +136,7 @@ public class PlayerMovement : MonoBehaviour
     public void Flip() 
     { 
         //Will swap the direction that the player is facing
-        isFacingRight = !isFacingRight;
+        IsFacingRight = !IsFacingRight;
         scale.x *= -1f;
         transform.localScale = scale;
     }
@@ -152,10 +149,7 @@ public class PlayerMovement : MonoBehaviour
         rb.isKinematic = false;
 
         rb.velocity = Vector2.zero;
-        Debug.Log(roomChangeVelocity);
         rb.AddForce(roomChangeVelocity, ForceMode2D.Impulse);
-
-        grapple.enabled = true;
         
         jump.enabled = true;
         grapple.enabled = true;

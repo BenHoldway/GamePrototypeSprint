@@ -2,28 +2,58 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class LevelManager : MonoBehaviour
 {
-    [SerializeField] GameObject[] areasInOrder;
+    float timerTime;
+    int collectableAmount;
+    int collectablesCollected;
+    int deathCount;
+
+    private void Awake()
+    {
+        collectableAmount = GameObject.FindObjectsOfType(typeof(Collectable)).Length;
+
+        if(Time.timeScale != 1f)
+            Time.timeScale = 1f;
+    }
 
     // Start is called before the first frame update
-/*    void Start()
+    void OnEnable()
     {
-        for (int i = 0; i < areasInOrder.Length; i++)
-        {
-            if(i == 0)
-            {
-                areasInOrder[0].SetActive(true);
-            }
-            else
-                areasInOrder[i].SetActive(false);
-        }
-    }*/
+        Collectable.collectableCollected += UpdateCollectableAmount;
+        PlayerDeath.death += UpdateDeathCount;
+        UIManager.levelCompleted += Display;
+    }
+
+    void OnDisable()
+    {
+        Collectable.collectableCollected -= UpdateCollectableAmount;
+        PlayerDeath.death -= UpdateDeathCount;
+        UIManager.levelCompleted -= Display;
+    }
 
     // Update is called once per frame
     void Update()
     {
-        
+        timerTime += Time.deltaTime;
+    }
+
+    void UpdateCollectableAmount()
+    {
+        collectablesCollected++;
+    }
+
+    void UpdateDeathCount()
+    {
+        deathCount++;
+    }
+
+    void Display(TMP_Text timeText, TMP_Text collectableText, TMP_Text deathText)
+    {
+        timeText.text = $"Time of Completion: {TimeSpan.FromSeconds(timerTime).ToString(@"mm\:ss\.ff")}";
+        collectableText.text = $"Collectables Collected: x{collectablesCollected}/{collectableAmount}";
+        deathText.text = $"Death Count: x{deathCount}";
     }
 }

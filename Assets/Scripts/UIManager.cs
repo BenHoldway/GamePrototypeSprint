@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
@@ -8,7 +9,13 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] GameObject pauseMenu;
 
+    [SerializeField] GameObject endScreen;
+    [SerializeField] TMP_Text timeText;
+    [SerializeField] TMP_Text collectablesText;
+    [SerializeField] TMP_Text deathText;
+
     public static event Action ChangeGameState;
+    public static event Action<TMP_Text, TMP_Text, TMP_Text> levelCompleted;
 
     // Start is called before the first frame update
     void Awake()
@@ -28,7 +35,6 @@ public class UIManager : MonoBehaviour
 
         playerControls.Player.Pause.started += ctx =>
         {
-            Debug.Log("Started");
             if (pauseMenu == null)
                 return;
 
@@ -36,6 +42,13 @@ public class UIManager : MonoBehaviour
             Time.timeScale = 0f;
             pauseMenu.SetActive(true);
         };
+
+        FinishLevel.levelCompleted += ShowEndScreen;
+    }
+
+    private void OnDisable()
+    {
+        FinishLevel.levelCompleted -= ShowEndScreen;
     }
 
     public void LoadGame() 
@@ -58,5 +71,11 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
         pauseMenu.SetActive(false);
         ChangeGameState?.Invoke();
+    }
+
+    void ShowEndScreen()
+    {
+        endScreen.SetActive(true);
+        levelCompleted?.Invoke(timeText, collectablesText, deathText);
     }
 }
